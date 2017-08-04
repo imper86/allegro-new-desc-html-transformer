@@ -14,7 +14,10 @@
     },
     "autoload": {
         "psr-4": {
-            "Imper86\\AllegroNewDescHtmlTransformer": "src/Imper86/AllegroNewDescHtmlTransformer"
+            "Imper86\\AllegroNewDescHtmlTransformer\\": "src/Imper86/AllegroNewDescHtmlTransformer"
         }
+    },
+    "require-dev": {
+        "symfony/var-dumper": "^3.3"
     }
 }

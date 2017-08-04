@@ -12,69 +12,21 @@ use PHPHtmlParser\Dom;
 
 class HtmlTransformer implements HtmlTransformerInterface
 {
-    /**
-     * @var string
-     */
-    private $originalHtmlString;
-
-    /**
-     * @var Dom
-     */
-    private $originalDom;
-
-    /**
-     * @var Dom
-     */
-    private $transformedDom;
-
-
-    public function __construct(string $htmlString)
+    public function transformHtmlString(string $htmlString): TransformedHtmlInterface
     {
-        $this->originalHtmlString = $htmlString;
+        $originalDom = new Dom();
+        $originalDom->load($htmlString);
 
-        $this->originalDom = new Dom();
-        $this->originalDom->load($htmlString, [
-            'whitespaceTextNode' => false,
-        ]);
+        $transformedDom = new Dom();
+        $transformedDom->load('');
 
-        $this->transformedDom = new Dom();
-        $this->transformedDom->load('', [
-            'whitespaceTextNode' => false,
-        ]);
-
-        $this->executeTransform();
-    }
-
-    public function getOriginalDom(): Dom
-    {
-        return $this->originalDom;
-    }
-
-    public function getTransformedDom(): Dom
-    {
-        return $this->transformedDom;
-    }
-
-    public function getOriginalString(): string
-    {
-        return $this->originalHtmlString;
-    }
-
-    public function getTransformedString(): string
-    {
-        return $this->transformedDom->root->innerHtml();
-    }
-
-
-    private function executeTransform(): void
-    {
         /** @var Dom\HtmlNode[] $rootChildren */
-        $rootChildren = $this->originalDom->root->getChildren();
+        $rootChildren = $originalDom->root->getChildren();
 
         foreach ($rootChildren as $rootChild) {
             if ($rootChild->getTag()->name() === 'text') {
                 if (!empty($rootChild->text())) {
-                    $this->transformedDom->root->addChild(
+                    $transformedDom->root->addChild(
                         $this->createSimpleNodeWithText(new Dom\Tag('p'), $rootChild->text())
                     );
                 }
@@ -84,7 +36,7 @@ class HtmlTransformer implements HtmlTransformerInterface
                     continue;
                 }
 
-                $this->transformedDom->root->addChild($parsedListNode);
+                $transformedDom->root->addChild($parsedListNode);
                 continue;
             } elseif (in_array($rootChild->getTag()->name(), ['h1', 'h2'])) {
                 $parsedHeaders = $this->prepareHeaderNode($rootChild);
@@ -94,7 +46,7 @@ class HtmlTransformer implements HtmlTransformerInterface
                 }
 
                 foreach ($parsedHeaders as $parsedHeader) {
-                    $this->transformedDom->root->addChild($parsedHeader);
+                    $transformedDom->root->addChild($parsedHeader);
                 }
             } else {
                 $parsedNodes = $this->transformToParagraph($rootChild);
@@ -104,10 +56,14 @@ class HtmlTransformer implements HtmlTransformerInterface
                 }
 
                 foreach ($parsedNodes as $parsedNode) {
-                    $this->transformedDom->root->addChild($parsedNode);
+                    $transformedDom->root->addChild($parsedNode);
                 }
             }
         }
+
+        $transformedHtmlObject = new TransformedHtml($originalDom, $transformedDom);
+
+        return $transformedHtmlObject;
     }
 
     private function prepareListNode(Dom\HtmlNode $htmlNode): ?Dom\HtmlNode
