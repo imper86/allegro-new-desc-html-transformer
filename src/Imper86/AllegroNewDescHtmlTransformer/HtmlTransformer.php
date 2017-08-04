@@ -31,7 +31,9 @@ class HtmlTransformer implements HtmlTransformerInterface
             if ($rootChild->getTag()->name() === 'text') {
                 if (!empty($rootChild->text())) {
                     $transformedDom->root->addChild(
-                        $this->createSimpleNodeWithText(new Dom\Tag('p'), $rootChild->text())
+                        $this->convertHtmlSpecialChars(
+                            $this->createSimpleNodeWithText(new Dom\Tag('p'), $rootChild->text())
+                        )
                     );
                 }
             } elseif (in_array($rootChild->getTag()->name(), ['ul', 'ol'])) {
@@ -40,7 +42,7 @@ class HtmlTransformer implements HtmlTransformerInterface
                     continue;
                 }
 
-                $transformedDom->root->addChild($parsedListNode);
+                $transformedDom->root->addChild($this->convertHtmlSpecialChars($parsedListNode));
                 continue;
             } elseif (in_array($rootChild->getTag()->name(), ['h1', 'h2'])) {
                 $parsedHeaders = $this->prepareHeaderNode($rootChild);
@@ -50,7 +52,7 @@ class HtmlTransformer implements HtmlTransformerInterface
                 }
 
                 foreach ($parsedHeaders as $parsedHeader) {
-                    $transformedDom->root->addChild($parsedHeader);
+                    $transformedDom->root->addChild($this->convertHtmlSpecialChars($parsedHeader));
                 }
             } else {
                 $parsedNodes = $this->transformToParagraph($rootChild);
@@ -60,7 +62,7 @@ class HtmlTransformer implements HtmlTransformerInterface
                 }
 
                 foreach ($parsedNodes as $parsedNode) {
-                    $transformedDom->root->addChild($parsedNode);
+                    $transformedDom->root->addChild($this->convertHtmlSpecialChars($parsedNode));
                 }
             }
         }
@@ -170,7 +172,7 @@ class HtmlTransformer implements HtmlTransformerInterface
         $workingNode = new Dom\HtmlNode('p');
         foreach ($children as $child) {
             if ($child->getTag()->name() === 'text') {
-                $workingNode->addChild(new Dom\TextNode($this->prepareString($child->text())));
+                $workingNode->addChild(new Dom\TextNode($child->text()));
             } elseif ($child->getTag()->name() === 'br') {
                 if (!empty($workingNode->innerHtml())) {
                     $nodesToReturn[] = $workingNode;
@@ -222,21 +224,38 @@ class HtmlTransformer implements HtmlTransformerInterface
             }
         }
 
-        $textNode = new Dom\TextNode($this->prepareString(implode('', $stringsToMerge)));
+        $textNode = new Dom\TextNode(implode('', $stringsToMerge));
 
         return $textNode;
-    }
-
-    private function prepareString(string $string): string
-    {
-        return htmlspecialchars(strip_tags($string));
     }
 
     private function createSimpleNodeWithText(Dom\Tag $tag, string $text): Dom\HtmlNode
     {
         $newNode = new Dom\HtmlNode($tag->name());
-        $textNode = new Dom\TextNode($this->prepareString($text));
+        $textNode = new Dom\TextNode($text);
         $newNode->addChild($textNode);
         return $newNode;
+    }
+
+    private function convertHtmlSpecialChars(Dom\HtmlNode $htmlNode): Dom\HtmlNode
+    {
+        $nodeToReturn = new Dom\HtmlNode($htmlNode->getTag()->name());
+
+        if (!$htmlNode->hasChildren()) {
+            return $nodeToReturn;
+        }
+
+        /** @var Dom\HtmlNode[] $children */
+        $children = $htmlNode->getChildren();
+
+        foreach ($children as $child) {
+            if ($child->getTag()->name() === 'text') {
+                $nodeToReturn->addChild(new Dom\TextNode(htmlspecialchars($child->text())));
+            } else {
+                $nodeToReturn->addChild($this->convertHtmlSpecialChars($child));
+            }
+        }
+
+        return $nodeToReturn;
     }
 }
