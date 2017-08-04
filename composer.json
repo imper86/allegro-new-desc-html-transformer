@@ -1,0 +1,20 @@
+{
+    "name": "imper86/allegro-new-desc-html-transformer",
+    "description": "Simple library to transform your html description to new Allegro.pl responsible description",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Adrian Szuszkiewicz",
+            "email": "me@imper.info"
+        }
+    ],
+    "require": {
+        "paquettg/php-html-parser": "^1.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Imper86\\AllegroNewDescHtmlTransformer": "src/Imper86/AllegroNewDescHtmlTransformer"
+        }
+    }
+}
