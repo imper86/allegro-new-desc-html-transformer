@@ -187,7 +187,10 @@ class HtmlTransformer implements HtmlTransformerInterface
                     $nodesToReturn[] = $this->prepareListNode($child);
                 }
             } else {
-                $workingNode->addChild($this->extractTextFromNode($child));
+                $textNode = $this->extractTextFromNode($child);
+                if (null !== $textNode) {
+                    $workingNode->addChild($textNode);
+                }
             }
         }
 
