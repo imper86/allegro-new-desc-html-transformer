@@ -15,10 +15,14 @@ class HtmlTransformer implements HtmlTransformerInterface
     public function transformHtmlString(string $htmlString): TransformedHtmlInterface
     {
         $originalDom = new Dom();
-        $originalDom->load($htmlString);
+        $originalDom->load($htmlString, [
+            'whitespaceTextNode' => false,
+        ]);
 
         $transformedDom = new Dom();
-        $transformedDom->load('');
+        $transformedDom->load('', [
+            'whitespaceTextNode' => false,
+        ]);
 
         /** @var Dom\HtmlNode[] $rootChildren */
         $rootChildren = $originalDom->root->getChildren();
