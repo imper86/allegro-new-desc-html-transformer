@@ -179,6 +179,10 @@ class HtmlTransformer implements HtmlTransformerInterface
                     $workingNode = new Dom\HtmlNode('p');
                 }
             } elseif (in_array($child->getTag()->name(), ['b', 'strong'])) {
+                if (empty($this->extractTextFromNode($child))) {
+                    continue;
+                }
+
                 $workingNode->addChild(
                     $this->createSimpleNodeWithText(new Dom\Tag('b'), $this->extractTextFromNode($child))
                 );
