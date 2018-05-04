@@ -116,7 +116,7 @@ class HtmlTransformer implements HtmlTransformerInterface
                         $child->innerHtml()
                     )
                 );
-            } else {
+            } elseif (null !== $this->extractTextFromNode($child)) {
                 $liNodeToReturn->addChild($this->extractTextFromNode($child));
             }
         }
