@@ -255,8 +255,9 @@ class HtmlTransformer implements HtmlTransformerInterface
         foreach ($children as $child) {
             if ($child->getTag()->name() === 'text') {
                 $text = $child->text();
+                $text = htmlspecialchars_decode($text, ENT_QUOTES);
                 $text = str_replace('&nbsp;', ' ', $text);
-                $text = htmlspecialchars($text);
+                $text = htmlspecialchars($text, ENT_QUOTES | ENT_HTML5);
                 $nodeToReturn->addChild(new Dom\TextNode($text));
             } else {
                 $nodeToReturn->addChild($this->convertHtmlSpecialChars($child));
