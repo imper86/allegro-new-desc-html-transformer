@@ -11,7 +11,7 @@
     ],
     "require": {
         "php": "^7.1",
-        "paquettg/php-html-parser": "^1.7"
+        "paquettg/php-html-parser": "^2.0"
     },
     "autoload": {
         "psr-4": {
